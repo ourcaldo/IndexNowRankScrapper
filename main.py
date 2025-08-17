@@ -32,9 +32,11 @@ def load_config():
             "replit.com",
             "*.replit.com", 
             "*.replit.dev",
+            "*.replit.app",
             "indexnow.studio",
             "*.indexnow.studio",
-            "reqbin.com"
+            "reqbin.com",
+            "localhost"
         ]
     }
     
@@ -97,7 +99,11 @@ async def root(
     }
 
 @app.get("/health")
-async def health_check():
+async def health_check(
+    request: Request,
+    api_key: str = Depends(get_api_key),
+    hostname: str = Depends(get_hostname)
+):
     return {"status": "healthy", "service": "keyword-tracker"}
 
 @app.post("/track-keyword", response_model=KeywordTrackingResponse)
