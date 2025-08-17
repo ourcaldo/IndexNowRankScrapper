@@ -148,17 +148,24 @@ async def track_keyword(
         # Initialize keyword tracker
         tracker = KeywordTracker()
         
-        # Execute tracking
-        result = tracker.track_keyword_rank(
-            keyword=request.keyword,
-            domain=request.domain,
-            device=request.devices,
-            country=request.country,
-            max_pages=request.max_pages,
-            headless=request.headless,
-            max_retries=request.max_retries,
-            use_proxy=request.use_proxy
-        )
+        # Execute tracking in a separate thread to avoid asyncio conflicts
+        import asyncio
+        import concurrent.futures
+        
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            result = await loop.run_in_executor(
+                executor,
+                tracker.track_keyword_rank,
+                request.keyword,
+                request.domain,
+                request.devices,
+                request.country,
+                request.max_pages,
+                request.headless,
+                request.max_retries,
+                request.use_proxy
+            )
         
         logger.info(f"Tracking completed for '{request.keyword}' - Rank: {result.get('rank', 'Not found')}")
         
