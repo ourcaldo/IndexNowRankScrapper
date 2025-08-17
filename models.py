@@ -36,7 +36,7 @@ class KeywordTrackingRequest(BaseModel):
         return keyword
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "keyword": "python web scraping",
                 "domain": "example.com",
@@ -61,7 +61,7 @@ class KeywordTrackingResponse(BaseModel):
     execution_time: Optional[float] = Field(None, description="Execution time in seconds")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "keyword": "python web scraping",
                 "domain": "example.com",

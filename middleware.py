@@ -11,7 +11,8 @@ def verify_api_key(request: Request, valid_api_keys: list) -> str:
     api_key = request.headers.get("X-API-Key") or request.headers.get("x-api-key")
     
     if not api_key:
-        logger.warning(f"Missing API key in request from {request.client.host}")
+        client_host = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+        logger.warning(f"Missing API key in request from {client_host}")
         raise HTTPException(
             status_code=401,
             detail={
@@ -21,7 +22,8 @@ def verify_api_key(request: Request, valid_api_keys: list) -> str:
         )
     
     if api_key not in valid_api_keys:
-        logger.warning(f"Invalid API key attempted from {request.client.host}")
+        client_host = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+        logger.warning(f"Invalid API key attempted from {client_host}")
         raise HTTPException(
             status_code=401,
             detail={
@@ -30,7 +32,8 @@ def verify_api_key(request: Request, valid_api_keys: list) -> str:
             }
         )
     
-    logger.info(f"Valid API key authenticated from {request.client.host}")
+    client_host = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+    logger.info(f"Valid API key authenticated from {client_host}")
     return api_key
 
 def verify_hostname(request: Request, allowed_hostnames: list) -> str:
@@ -58,7 +61,8 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
     hostname = hostname.split(':')[0].lower()
     
     if not hostname:
-        logger.warning(f"Missing hostname in request from {request.client.host}")
+        client_host = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+        logger.warning(f"Missing hostname in request from {client_host}")
         raise HTTPException(
             status_code=403,
             detail={
@@ -75,7 +79,8 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
             break
     
     if not hostname_allowed:
-        logger.warning(f"Unauthorized hostname attempted: {hostname} from {request.client.host}")
+        client_host = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+        logger.warning(f"Unauthorized hostname attempted: {hostname} from {client_host}")
         raise HTTPException(
             status_code=403,
             detail={

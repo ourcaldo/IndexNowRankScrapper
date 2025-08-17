@@ -93,8 +93,9 @@ class KeywordTracker:
                         # 4. Perform search
                         logger.info(f"Searching for '{keyword}'...")
                         search_box = page.wait_for_selector("//textarea[@name='q']", timeout=10000)
-                        search_box.type(keyword)
-                        search_box.press("Enter")
+                        if search_box:
+                            search_box.type(keyword)
+                            search_box.press("Enter")
                         time.sleep(2)
                         
                         if check_captcha(page):
