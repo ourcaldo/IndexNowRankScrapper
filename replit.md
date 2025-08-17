@@ -31,10 +31,10 @@ Preferred communication style: Simple, everyday language.
 - **Default value merging** ensures system stability when config files are incomplete
 - **Runtime configuration loading** allows updates without service restart
 
-## Browser Extension System
-- **Mobile User Agent extension** modifies browser headers to simulate mobile devices
-- **Manifest v2 extension architecture** provides reliable user agent spoofing
-- **Random user agent selection** from predefined mobile device profiles
+## Device Simulation System
+- **Built-in user agent switching** directly through Camoufox configuration for mobile simulation
+- **Random mobile user agent selection** from predefined device profiles (iPhone, Android)
+- **No external extensions required** - streamlined configuration for both desktop and mobile
 
 ## Error Handling & Resilience
 - **Structured error responses** with detailed error codes and user-friendly messages

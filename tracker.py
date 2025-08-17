@@ -25,20 +25,16 @@ class KeywordTracker:
         config = {}
         
         if device_type == 'mobile':
-            ext_path = os.path.abspath('Extensions/Mobile User Agent')
-            
-            if not os.path.exists(ext_path):
-                self.logger.error(f"Extension folder not found: {ext_path}")
-                return config
-                
-            required_files = ['manifest.json', 'background.js']
-            missing_files = [f for f in required_files if not os.path.exists(os.path.join(ext_path, f))]
-            
-            if missing_files:
-                self.logger.error(f"Missing files in extension: {', '.join(missing_files)}")
-            else:
-                config['addons'] = [ext_path]
-                self.logger.info(f"Successfully loaded mobile extension from: {ext_path}")
+            # Set mobile user agent directly in Camoufox config
+            mobile_user_agents = [
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1",
+                "Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36",
+                "Mozilla/5.0 (Linux; Android 10; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+            ]
+            import random
+            selected_ua = random.choice(mobile_user_agents)
+            config['user_agent'] = selected_ua
+            self.logger.info(f"Using mobile user agent: {selected_ua}")
         
         return config
 
@@ -110,7 +106,7 @@ class KeywordTracker:
                             retry_count += 1
                             continue
                         
-                        # 2. Verify mobile extension
+                        # 2. Verify user agent for mobile
                         if device == 'mobile':
                             user_agent = page.evaluate("navigator.userAgent")
                             self.logger.info(f"Current User Agent: {user_agent}")
