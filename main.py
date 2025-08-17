@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
 import logging
+import asyncio
+import concurrent.futures
 from models import KeywordTrackingRequest, KeywordTrackingResponse
 from middleware import verify_api_key, verify_hostname
 from tracker import KeywordTracker
@@ -74,7 +76,11 @@ app.add_middleware(
 )
 
 @app.get("/")
-async def root():
+async def root(
+    request: Request,
+    api_key: str = Depends(lambda req: verify_api_key(req, config["api_keys"])),
+    hostname: str = Depends(lambda req: verify_hostname(req, config["allowed_hostnames"]))
+):
     return {
         "message": "Keyword Tracking API",
         "version": "1.0.0",
@@ -88,12 +94,18 @@ async def root():
 async def health_check():
     return {"status": "healthy", "service": "keyword-tracker"}
 
+def get_api_key(http_request: Request):
+    return verify_api_key(http_request, config["api_keys"])
+
+def get_hostname(http_request: Request):
+    return verify_hostname(http_request, config["allowed_hostnames"])
+
 @app.post("/track-keyword", response_model=KeywordTrackingResponse)
 async def track_keyword(
     request: KeywordTrackingRequest,
     http_request: Request,
-    api_key: str = Depends(lambda req: verify_api_key(req, config["api_keys"])),
-    hostname: str = Depends(lambda req: verify_hostname(req, config["allowed_hostnames"]))
+    api_key: str = Depends(get_api_key),
+    hostname: str = Depends(get_hostname)
 ):
     """
     Track keyword ranking on Google SERP
@@ -144,7 +156,8 @@ async def track_keyword(
             country=request.country,
             max_pages=request.max_pages,
             headless=request.headless,
-            max_retries=request.max_retries
+            max_retries=request.max_retries,
+            use_proxy=request.use_proxy
         )
         
         logger.info(f"Tracking completed for '{request.keyword}' - Rank: {result.get('rank', 'Not found')}")

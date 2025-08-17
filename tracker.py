@@ -34,10 +34,10 @@ def check_captcha(page):
 
 class KeywordTracker:
     def track_keyword_rank(self, keyword, domain, device="desktop", country="ID", 
-                          max_pages=100, headless=True, max_retries=3):
+                          max_pages=100, headless=True, max_retries=3, use_proxy=True):
         start_time = time.time()
         device_config = get_device_config(device)
-        proxy_config = get_proxy_config(country)
+        proxy_config = get_proxy_config(country) if use_proxy else None
         retry_count = 0
         output = {
             'keyword': keyword,
@@ -53,13 +53,16 @@ class KeywordTracker:
         while retry_count < max_retries:
             output['attempts'] += 1
             try:
-                with Camoufox(
-                    proxy=proxy_config,
-                    geoip=True,
-                    headless=headless,
-                    timeout=30000,
+                camoufox_args = {
+                    "geoip": True,
+                    "headless": headless,
+                    "timeout": 30000,
                     **device_config
-                ) as browser:
+                }
+                if proxy_config:
+                    camoufox_args["proxy"] = proxy_config
+                
+                with Camoufox(**camoufox_args) as browser:
                     page = browser.new_page()
                     
                     try:

@@ -10,6 +10,7 @@ class KeywordTrackingRequest(BaseModel):
     max_pages: int = Field(default=100, description="Maximum pages to search (10 results per page)", ge=1, le=100)
     headless: bool = Field(default=True, description="Run browser in headless mode")
     max_retries: int = Field(default=3, description="Maximum retries for captcha detection", ge=1, le=10)
+    use_proxy: bool = Field(default=True, description="Whether to use proxy for requests")
 
     @validator('domain')
     def validate_domain(cls, v):
@@ -43,7 +44,8 @@ class KeywordTrackingRequest(BaseModel):
                 "country": "ID",
                 "max_pages": 100,
                 "headless": True,
-                "max_retries": 3
+                "max_retries": 3,
+                "use_proxy": True
             }
         }
 
