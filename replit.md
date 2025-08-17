@@ -6,6 +6,13 @@ This is a FastAPI-based keyword tracking service that monitors domain rankings o
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+## August 17, 2025
+- **Security Enhancement**: Removed whitelisted hostname exposure in error responses to prevent information disclosure
+- **Replit Migration**: Successfully migrated project from Replit Agent to standard Replit environment
+- **Code Compatibility**: Fixed LSP diagnostics and Pydantic schema warnings for robust operation
+
 # System Architecture
 
 ## API Framework

@@ -84,9 +84,8 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
         raise HTTPException(
             status_code=403,
             detail={
-                "error": "Hostname not allowed",
-                "message": f"Requests from {hostname} are not permitted",
-                "allowed_hostnames": allowed_hostnames
+                "error": "Access denied",
+                "message": "Requests from this hostname are not permitted"
             }
         )
     
