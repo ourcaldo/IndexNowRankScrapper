@@ -5,9 +5,9 @@ import re
 class KeywordTrackingRequest(BaseModel):
     keyword: str = Field(..., description="Keyword to search for", min_length=1, max_length=200)
     domain: str = Field(..., description="Domain to track (without http/https)", min_length=1, max_length=100)
-    device: Literal["desktop", "mobile"] = Field(default="desktop", description="Device type for search")
+    devices: Literal["desktop", "mobile"] = Field(default="desktop", description="Device type for search")
     country: str = Field(default="ID", description="Country code for proxy and localization", min_length=2, max_length=2)
-    max_pages: int = Field(default=10, description="Maximum pages to search (10 results per page)", ge=1, le=100)
+    max_pages: int = Field(default=100, description="Maximum pages to search (10 results per page)", ge=1, le=100)
     headless: bool = Field(default=True, description="Run browser in headless mode")
     max_retries: int = Field(default=3, description="Maximum retries for captcha detection", ge=1, le=10)
 
@@ -39,9 +39,9 @@ class KeywordTrackingRequest(BaseModel):
             "example": {
                 "keyword": "python web scraping",
                 "domain": "example.com",
-                "device": "desktop",
+                "devices": "desktop",
                 "country": "ID",
-                "max_pages": 10,
+                "max_pages": 100,
                 "headless": True,
                 "max_retries": 3
             }

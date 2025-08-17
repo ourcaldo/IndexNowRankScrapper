@@ -20,9 +20,9 @@ curl -X POST "https://your-app.replit.app/track-keyword" \
   -d '{
     "keyword": "python web scraping",
     "domain": "example.com",
-    "device": "desktop",
+    "devices": "desktop",
     "country": "ID",
-    "max_pages": 10,
+    "max_pages": 100,
     "headless": true,
     "max_retries": 3
   }'
@@ -36,7 +36,7 @@ curl -X POST "https://your-app.replit.app/track-keyword" \
   -d '{
     "keyword": "best smartphone 2024",
     "domain": "techsite.com",
-    "device": "mobile",
+    "devices": "mobile",
     "country": "US",
     "max_pages": 5,
     "headless": true,
@@ -50,7 +50,7 @@ curl -X POST "https://your-app.replit.app/track-keyword" \
 |-----------|------|----------|---------|-------------|
 | keyword | string | Yes | - | Keyword to search for (1-200 chars) |
 | domain | string | Yes | - | Domain to track (without http/https) |
-| device | string | No | "desktop" | Device type: "desktop" or "mobile" |
+| devices | string | No | "desktop" | Device type: "desktop" or "mobile" |
 | country | string | No | "ID" | Country code (2 chars, e.g., US, ID, UK) |
 | max_pages | integer | No | 10 | Max pages to search (1-100) |
 | headless | boolean | No | true | Run browser in headless mode |

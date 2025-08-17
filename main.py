@@ -107,9 +107,9 @@ async def track_keyword(
     {
         "keyword": "python web scraping",
         "domain": "example.com",
-        "device": "desktop",
+        "devices": "desktop",
         "country": "ID",
-        "max_pages": 10,
+        "max_pages": 100,
         "headless": true,
         "max_retries": 3
     }
@@ -120,7 +120,7 @@ async def track_keyword(
     {
         "keyword": "python web scraping",
         "domain": "example.com",
-        "device": "desktop",
+        "devices": "desktop",
         "country": "ID",
         "rank": 15,
         "url": "https://example.com/web-scraping-guide",
@@ -140,7 +140,7 @@ async def track_keyword(
         result = tracker.track_keyword_rank(
             keyword=request.keyword,
             domain=request.domain,
-            device=request.device,
+            device=request.devices,
             country=request.country,
             max_pages=request.max_pages,
             headless=request.headless,
