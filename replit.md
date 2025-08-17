@@ -12,6 +12,7 @@ Preferred communication style: Simple, everyday language.
 - **Security Enhancement**: Removed whitelisted hostname exposure in error responses to prevent information disclosure
 - **Replit Migration**: Successfully migrated project from Replit Agent to standard Replit environment
 - **Code Compatibility**: Fixed LSP diagnostics and Pydantic schema warnings for robust operation
+- **Timeout Control**: Added configurable max processing time (120s default) to prevent long-running operations
 
 # System Architecture
 

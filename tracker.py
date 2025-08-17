@@ -34,7 +34,7 @@ def check_captcha(page):
 
 class KeywordTracker:
     def track_keyword_rank(self, keyword, domain, device="desktop", country="ID", 
-                          max_pages=100, headless=True, max_retries=3, use_proxy=True):
+                          max_pages=100, headless=True, max_retries=3, use_proxy=True, max_processing_time=120):
         start_time = time.time()
         device_config = get_device_config(device)
         proxy_config = get_proxy_config(country) if use_proxy else None
@@ -51,6 +51,12 @@ class KeywordTracker:
         }
 
         while retry_count < max_retries:
+            # Check if we've exceeded the maximum processing time
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= max_processing_time:
+                output['error'] = f"Processing timeout after {max_processing_time} seconds"
+                logger.warning(f"Processing timeout reached ({max_processing_time}s) for keyword '{keyword}'")
+                break
             output['attempts'] += 1
             try:
                 camoufox_args = {
@@ -108,6 +114,11 @@ class KeywordTracker:
                         found_url = None
                         
                         while current_page <= max_pages:
+                            # Check timeout within the page loop as well
+                            if time.time() - start_time >= max_processing_time:
+                                output['error'] = f"Processing timeout after {max_processing_time} seconds"
+                                logger.warning(f"Processing timeout reached ({max_processing_time}s) while processing page {current_page}")
+                                break
                             logger.info(f"Checking page {current_page}...")
                             
                             if check_captcha(page):

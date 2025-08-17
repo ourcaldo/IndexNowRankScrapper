@@ -123,7 +123,8 @@ async def track_keyword(
         "country": "ID",
         "max_pages": 100,
         "headless": true,
-        "max_retries": 3
+        "max_retries": 3,
+        "max_processing_time": 120
     }
     ```
     
@@ -164,7 +165,8 @@ async def track_keyword(
                 request.max_pages,
                 request.headless,
                 request.max_retries,
-                request.use_proxy
+                request.use_proxy,
+                request.max_processing_time
             )
         
         logger.info(f"Tracking completed for '{request.keyword}' - Rank: {result.get('rank', 'Not found')}")
