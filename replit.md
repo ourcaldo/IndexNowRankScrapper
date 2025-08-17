@@ -14,6 +14,7 @@ Preferred communication style: Simple, everyday language.
 - **Code Compatibility**: Fixed LSP diagnostics and Pydantic schema warnings for robust operation
 - **Timeout Control**: Added configurable max processing time (120s default) to prevent long-running operations
 - **Anti-Spoofing Security**: Enhanced hostname verification with DNS validation, header consistency checks, and multi-layer authentication
+- **Deployment Documentation**: Created comprehensive deployment guide, service scripts, and API usage examples
 
 # System Architecture
 

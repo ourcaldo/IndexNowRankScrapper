@@ -1,30 +1,35 @@
-# Keyword Tracking API Usage Examples
+# API Usage Examples & Request Guide
 
-## API Endpoint
-- **Base URL**: Your Replit app URL (e.g., `https://your-app.replit.app`)
-- **Endpoint**: `POST /track-keyword`
+## Quick Start
+- **Health Check**: `GET /health`
+- **Keyword Tracking**: `POST /track-keyword`
+- **API Documentation**: `GET /docs` (Interactive Swagger UI)
 
-## Required Headers
+## Authentication
+All endpoints require these headers:
 ```
-X-API-Key: default_api_key_12345
+X-API-Key: your_api_key_here
+Host: yourdomain.com
 Content-Type: application/json
 ```
 
 ## Example Request (cURL)
 
-### Desktop Search
+### Desktop Search Example
 ```bash
-curl -X POST "https://your-app.replit.app/track-keyword" \
-  -H "X-API-Key: default_api_key_12345" \
+curl -X POST "http://your-server:5000/track-keyword" \
+  -H "X-API-Key: your_api_key_here" \
+  -H "Host: yourdomain.com" \
   -H "Content-Type: application/json" \
   -d '{
     "keyword": "python web scraping",
     "domain": "example.com",
     "devices": "desktop",
-    "country": "ID",
-    "max_pages": 100,
+    "country": "US",
+    "max_pages": 50,
     "headless": true,
-    "max_retries": 3
+    "max_retries": 3,
+    "max_processing_time": 120
   }'
 ```
 
@@ -55,6 +60,8 @@ curl -X POST "https://your-app.replit.app/track-keyword" \
 | max_pages | integer | No | 10 | Max pages to search (1-100) |
 | headless | boolean | No | true | Run browser in headless mode |
 | max_retries | integer | No | 3 | Max retries for CAPTCHA (1-10) |
+| use_proxy | boolean | No | true | Use proxy for requests |
+| max_processing_time | integer | No | 120 | Timeout in seconds (30-300) |
 
 ## Example Response
 
