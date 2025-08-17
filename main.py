@@ -75,11 +75,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def get_api_key(http_request: Request):
+    return verify_api_key(http_request, config["api_keys"])
+
+def get_hostname(http_request: Request):
+    return verify_hostname(http_request, config["allowed_hostnames"])
+
 @app.get("/")
 async def root(
     request: Request,
-    api_key: str = Depends(lambda req: verify_api_key(req, config["api_keys"])),
-    hostname: str = Depends(lambda req: verify_hostname(req, config["allowed_hostnames"]))
+    api_key: str = Depends(get_api_key),
+    hostname: str = Depends(get_hostname)
 ):
     return {
         "message": "Keyword Tracking API",
@@ -93,12 +99,6 @@ async def root(
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "keyword-tracker"}
-
-def get_api_key(http_request: Request):
-    return verify_api_key(http_request, config["api_keys"])
-
-def get_hostname(http_request: Request):
-    return verify_hostname(http_request, config["allowed_hostnames"])
 
 @app.post("/track-keyword", response_model=KeywordTrackingResponse)
 async def track_keyword(
