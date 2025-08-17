@@ -1,0 +1,23 @@
+{
+  "api_keys": [
+    "default_api_key_12345",
+    "backup_key_67890"
+  ],
+  "allowed_hostnames": [
+    "replit.com",
+    "*.replit.com",
+    "*.replit.dev",
+    "indexnow.studio",
+    "*.indexnow.studio",
+    "reqbin.com"
+  ],
+  "rate_limiting": {
+    "requests_per_minute": 10,
+    "requests_per_hour": 100
+  },
+  "default_settings": {
+    "max_pages": 10,
+    "max_retries": 3,
+    "timeout": 30000
+  }
+}

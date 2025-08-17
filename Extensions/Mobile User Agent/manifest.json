@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "Mobile User Agent",
+  "version": "1.0",
+  "description": "Changes user agent to mobile device",
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  }
+}
