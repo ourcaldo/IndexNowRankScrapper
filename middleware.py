@@ -70,7 +70,7 @@ def verify_ip_against_hostname(client_ip: str, claimed_hostname: str) -> bool:
 
 def verify_hostname(request: Request, allowed_hostnames: list) -> str:
     """
-    Verify request hostname against allowed list with anti-spoofing measures
+    Verify request hostname against allowed list - gets hostname from request headers
     """
     client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     
@@ -79,7 +79,10 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
     if header_warnings:
         logger.warning(f"Security warnings for request from {client_ip}: {'; '.join(header_warnings)}")
     
-    # Get hostname from various possible headers
+    # Get hostname from request headers in order of preference
+    # 1. Host header (primary)
+    # 2. Origin header (for CORS requests) 
+    # 3. Referer header (fallback)
     hostname = (
         request.headers.get("host") or 
         request.headers.get("origin") or 
@@ -95,8 +98,12 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
         except:
             pass
     
-    # Remove port if present
+    # Remove port if present (e.g., "example.com:8080" -> "example.com")
     hostname = hostname.split(':')[0].lower()
+    
+    # Debug logging to see what we're getting
+    logger.info(f"Request headers - Host: {request.headers.get('host')}, Origin: {request.headers.get('origin')}, Referer: {request.headers.get('referer')}")
+    logger.info(f"Extracted hostname: '{hostname}' from client {client_ip}")
     
     if not hostname:
         logger.warning(f"Missing hostname in request from {client_ip}")
@@ -125,18 +132,12 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
             }
         )
     
-    # Additional anti-spoofing verification
-    if not verify_ip_against_hostname(client_ip, hostname):
-        logger.warning(f"Potential hostname spoofing detected: {hostname} from {client_ip}")
-        # For high-security environments, you might want to reject this
-        # For now, we'll log but allow (since Replit uses proxies)
-        # raise HTTPException(
-        #     status_code=403,
-        #     detail={
-        #         "error": "Access denied",
-        #         "message": "Hostname verification failed"
-        #     }
-        # )
+    # Skip anti-spoofing verification for now (Replit uses proxies and load balancers)
+    # This can cause false positives in cloud environments
+    # if not verify_ip_against_hostname(client_ip, hostname):
+    #     logger.warning(f"Potential hostname spoofing detected: {hostname} from {client_ip}")
+    #     # For high-security environments, you might want to reject this
+    #     # For now, we'll log but allow (since Replit uses proxies)
     
     # Cross-reference multiple headers for consistency
     origin_header = request.headers.get("origin", "").replace("https://", "").replace("http://", "")

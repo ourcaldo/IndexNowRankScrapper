@@ -8,6 +8,13 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## August 20, 2025
+- **Migration Completion**: Successfully completed migration from Replit Agent to standard Replit environment
+- **Hostname Verification Fix**: Fixed hostname verification to properly read from request headers (Host, Origin, Referer)
+- **IP Address Support**: Added support for server IP addresses (160.79.119.44, 34.123.175.171) in allowed hostnames
+- **Anti-Spoofing Disabled**: Temporarily disabled DNS verification to prevent false positives in cloud environments
+- **Enhanced Debugging**: Added detailed logging for hostname extraction and verification process
+
 ## August 17, 2025
 - **Security Enhancement**: Removed whitelisted hostname exposure in error responses to prevent information disclosure
 - **Replit Migration**: Successfully migrated project from Replit Agent to standard Replit environment

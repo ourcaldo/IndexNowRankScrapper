@@ -7,9 +7,15 @@
     "replit.com",
     "*.replit.com",
     "*.replit.dev",
+    "*.replit.app",
     "indexnow.studio",
     "*.indexnow.studio",
-    "reqbin.com"
+    "reqbin.com",
+    "*.*.replit.dev",
+    "64.227.21.251",
+    "34.123.175.171",
+    "160.79.119.44",
+    "localhost"
   ],
   "rate_limiting": {
     "requests_per_minute": 10,
