@@ -70,34 +70,33 @@ def verify_ip_against_hostname(client_ip: str, claimed_hostname: str) -> bool:
 
 def verify_hostname(request: Request, allowed_hostnames: list) -> str:
     """
-    Verify request hostname - uses the real server hostname, not client-provided headers
+    Verify request hostname - validates what hostname the client claims to be from
     """
     client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     
-    # Get the actual server hostname/IP that this service is running on
-    # This cannot be spoofed by the client
-    import socket
-    try:
-        # Get the hostname of the server this is running on
-        server_hostname = socket.gethostname()
-        
-        # For cloud environments, we might need to check multiple sources
-        # Check if we're running on Replit or similar cloud platform
-        if 'replit' in server_hostname.lower():
-            # Extract the actual replit hostname
-            hostname = server_hostname.lower()
-        else:
-            # For other environments, use the server's actual IP
-            # Get the server's IP address that clients connect to
-            hostname = socket.gethostbyname(socket.gethostname())
-            
-    except Exception as e:
-        logger.warning(f"Could not determine server hostname: {e}")
-        # Fallback to checking against known server IPs
-        hostname = "0.0.0.0"  # This will allow all since it's in the config
+    # Get hostname from request headers (what the client claims their hostname is)
+    # This is what we want to validate against the allowed list
+    hostname = (
+        request.headers.get("host") or 
+        request.headers.get("origin") or 
+        request.headers.get("referer") or
+        ""
+    )
     
-    logger.info(f"Server hostname: {hostname}, Client IP: {client_ip}")
+    # Extract hostname from origin/referer if they contain full URLs
+    if hostname.startswith("http"):
+        try:
+            parsed = urlparse(hostname)
+            hostname = parsed.netloc
+        except:
+            pass
+    
+    # Remove port if present (e.g., "example.com:8080" -> "example.com")
+    hostname = hostname.split(':')[0].lower()
+    
+    logger.info(f"Client IP: {client_ip}")
     logger.info(f"Host header from client: {request.headers.get('host', 'none')}")
+    logger.info(f"Extracted claimed hostname: '{hostname}'")
     
     if not hostname:
         logger.warning(f"Missing hostname in request from {client_ip}")
