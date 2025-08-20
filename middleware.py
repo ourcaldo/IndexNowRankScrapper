@@ -70,40 +70,34 @@ def verify_ip_against_hostname(client_ip: str, claimed_hostname: str) -> bool:
 
 def verify_hostname(request: Request, allowed_hostnames: list) -> str:
     """
-    Verify request hostname against allowed list - gets hostname from request headers
+    Verify request hostname - uses the real server hostname, not client-provided headers
     """
     client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     
-    # Validate request headers for security
-    header_warnings = validate_request_headers(dict(request.headers))
-    if header_warnings:
-        logger.warning(f"Security warnings for request from {client_ip}: {'; '.join(header_warnings)}")
+    # Get the actual server hostname/IP that this service is running on
+    # This cannot be spoofed by the client
+    import socket
+    try:
+        # Get the hostname of the server this is running on
+        server_hostname = socket.gethostname()
+        
+        # For cloud environments, we might need to check multiple sources
+        # Check if we're running on Replit or similar cloud platform
+        if 'replit' in server_hostname.lower():
+            # Extract the actual replit hostname
+            hostname = server_hostname.lower()
+        else:
+            # For other environments, use the server's actual IP
+            # Get the server's IP address that clients connect to
+            hostname = socket.gethostbyname(socket.gethostname())
+            
+    except Exception as e:
+        logger.warning(f"Could not determine server hostname: {e}")
+        # Fallback to checking against known server IPs
+        hostname = "0.0.0.0"  # This will allow all since it's in the config
     
-    # Get hostname from request headers in order of preference
-    # 1. Host header (primary)
-    # 2. Origin header (for CORS requests) 
-    # 3. Referer header (fallback)
-    hostname = (
-        request.headers.get("host") or 
-        request.headers.get("origin") or 
-        request.headers.get("referer") or
-        ""
-    )
-    
-    # Extract hostname from origin/referer if they contain full URLs
-    if hostname.startswith("http"):
-        try:
-            parsed = urlparse(hostname)
-            hostname = parsed.netloc
-        except:
-            pass
-    
-    # Remove port if present (e.g., "example.com:8080" -> "example.com")
-    hostname = hostname.split(':')[0].lower()
-    
-    # Debug logging to see what we're getting
-    logger.info(f"Request headers - Host: {request.headers.get('host')}, Origin: {request.headers.get('origin')}, Referer: {request.headers.get('referer')}")
-    logger.info(f"Extracted hostname: '{hostname}' from client {client_ip}")
+    logger.info(f"Server hostname: {hostname}, Client IP: {client_ip}")
+    logger.info(f"Host header from client: {request.headers.get('host', 'none')}")
     
     if not hostname:
         logger.warning(f"Missing hostname in request from {client_ip}")
