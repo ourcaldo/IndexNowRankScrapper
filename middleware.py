@@ -70,20 +70,20 @@ def verify_ip_against_hostname(client_ip: str, claimed_hostname: str) -> bool:
 
 def verify_hostname(request: Request, allowed_hostnames: list) -> str:
     """
-    Verify request hostname - validates what hostname the client claims to be from
+    Verify request hostname against allowed list
     """
     client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     
-    # Get hostname from request headers (what the client claims their hostname is)
-    # This is what we want to validate against the allowed list
+    # Get hostname from Origin header first (this shows the actual sending domain)
+    # If no Origin, fall back to other headers
     hostname = (
-        request.headers.get("host") or 
         request.headers.get("origin") or 
         request.headers.get("referer") or
+        request.headers.get("host") or
         ""
     )
     
-    # Extract hostname from origin/referer if they contain full URLs
+    # Extract hostname from full URLs
     if hostname.startswith("http"):
         try:
             parsed = urlparse(hostname)
@@ -91,22 +91,15 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
         except:
             pass
     
-    # Remove port if present (e.g., "example.com:8080" -> "example.com")
+    # Remove port if present
     hostname = hostname.split(':')[0].lower()
     
-    logger.info(f"Client IP: {client_ip}")
-    logger.info(f"Host header from client: {request.headers.get('host', 'none')}")
-    logger.info(f"Extracted claimed hostname: '{hostname}'")
+    # If no hostname found in headers, allow the request (for direct API calls)
+    if not hostname or hostname == "0.0.0.0":
+        logger.info(f"No hostname header found - allowing direct API call from {client_ip}")
+        return "direct_api_call"
     
-    if not hostname:
-        logger.warning(f"Missing hostname in request from {client_ip}")
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "error": "Hostname verification failed",
-                "message": "Host header is required"
-            }
-        )
+    logger.info(f"Checking hostname: '{hostname}' from client {client_ip}")
     
     # Check against allowed hostnames (supporting wildcards)
     hostname_allowed = False
@@ -124,32 +117,6 @@ def verify_hostname(request: Request, allowed_hostnames: list) -> str:
                 "message": "Requests from this hostname are not permitted"
             }
         )
-    
-    # Skip anti-spoofing verification for now (Replit uses proxies and load balancers)
-    # This can cause false positives in cloud environments
-    # if not verify_ip_against_hostname(client_ip, hostname):
-    #     logger.warning(f"Potential hostname spoofing detected: {hostname} from {client_ip}")
-    #     # For high-security environments, you might want to reject this
-    #     # For now, we'll log but allow (since Replit uses proxies)
-    
-    # Cross-reference multiple headers for consistency
-    origin_header = request.headers.get("origin", "").replace("https://", "").replace("http://", "")
-    referer_header = request.headers.get("referer", "")
-    if referer_header:
-        try:
-            referer_hostname = urlparse(referer_header if referer_header.startswith("http") else f"http://{referer_header}").netloc
-        except:
-            referer_hostname = ""
-    else:
-        referer_hostname = ""
-    
-    # Check for header consistency (if multiple headers are present)
-    headers_present = [h for h in [hostname, origin_header, referer_hostname] if h]
-    if len(headers_present) > 1:
-        # All present headers should be consistent
-        if not all(h == hostname or h == "" for h in headers_present):
-            logger.warning(f"Inconsistent hostname headers from {client_ip}: host={hostname}, origin={origin_header}, referer={referer_hostname}")
-            # In production, you might want to be more strict here
     
     logger.info(f"Valid hostname authenticated: {hostname} from {client_ip}")
     return hostname
