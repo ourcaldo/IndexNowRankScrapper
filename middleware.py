@@ -70,53 +70,52 @@ def verify_ip_against_hostname(client_ip: str, claimed_hostname: str) -> bool:
 
 def verify_hostname(request: Request, allowed_hostnames: list) -> str:
     """
-    Verify request hostname against allowed list
+    Verify sender (client IP and resolved hostname) against allowed hostnames list
     """
     client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     
-    # Get hostname from Origin header first (this shows the actual sending domain)
-    # If no Origin, fall back to other headers
-    hostname = (
-        request.headers.get("origin") or 
-        request.headers.get("referer") or
-        request.headers.get("host") or
-        ""
-    )
+    logger.info(f"Checking sender IP: {client_ip}")
     
-    # Extract hostname from full URLs
-    if hostname.startswith("http"):
-        try:
-            parsed = urlparse(hostname)
-            hostname = parsed.netloc
-        except:
-            pass
+    # Try to resolve IP to hostname
+    sender_hostname = None
+    try:
+        import socket
+        sender_hostname = socket.gethostbyaddr(client_ip)[0].lower()
+        logger.info(f"Resolved sender hostname: {sender_hostname}")
+    except (socket.herror, socket.gaierror, OSError):
+        logger.info(f"Could not resolve hostname for IP: {client_ip}")
     
-    # Remove port if present
-    hostname = hostname.split(':')[0].lower()
+    # Check both IP and hostname against allowed list
+    access_allowed = False
+    matched_identifier = None
     
-    # If no hostname found in headers, allow the request (for direct API calls)
-    if not hostname or hostname == "0.0.0.0":
-        logger.info(f"No hostname header found - allowing direct API call from {client_ip}")
-        return "direct_api_call"
-    
-    logger.info(f"Checking hostname: '{hostname}' from client {client_ip}")
-    
-    # Check against allowed hostnames (supporting wildcards)
-    hostname_allowed = False
+    # Check client IP
     for allowed in allowed_hostnames:
-        if fnmatch.fnmatch(hostname, allowed.lower()):
-            hostname_allowed = True
+        if fnmatch.fnmatch(client_ip, allowed.lower()):
+            access_allowed = True
+            matched_identifier = client_ip
             break
     
-    if not hostname_allowed:
-        logger.warning(f"Unauthorized hostname attempted: {hostname} from {client_ip}")
+    # Check resolved hostname if available
+    if not access_allowed and sender_hostname:
+        for allowed in allowed_hostnames:
+            if fnmatch.fnmatch(sender_hostname, allowed.lower()):
+                access_allowed = True
+                matched_identifier = sender_hostname
+                break
+    
+    if not access_allowed:
+        if sender_hostname:
+            logger.warning(f"Unauthorized sender attempted: IP={client_ip}, hostname={sender_hostname}")
+        else:
+            logger.warning(f"Unauthorized sender attempted: IP={client_ip}, hostname=unresolved")
         raise HTTPException(
             status_code=403,
             detail={
                 "error": "Access denied",
-                "message": "Requests from this hostname are not permitted"
+                "message": "Requests from this sender are not permitted"
             }
         )
     
-    logger.info(f"Valid hostname authenticated: {hostname} from {client_ip}")
-    return hostname
+    logger.info(f"Valid sender authenticated: {matched_identifier} (IP: {client_ip})")
+    return matched_identifier
