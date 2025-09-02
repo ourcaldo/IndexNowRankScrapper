@@ -1,4 +1,5 @@
 modules = ["python-3.11", "bash"]
+run = "uvicorn main:app --host 0.0.0.0 --port 3000"
 [agent]
 expertMode = true
 
@@ -33,3 +34,6 @@ outputType = "webview"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[deployment]
+run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 3000"]
