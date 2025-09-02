@@ -63,6 +63,7 @@ class KeywordTracker:
                     "geoip": True,
                     "headless": headless,
                     "timeout": 30000,
+                    "blockimages": True,
                     **device_config
                 }
                 if proxy_config:
